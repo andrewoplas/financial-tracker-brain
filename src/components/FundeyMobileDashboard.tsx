@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { getWallets, getTransactions } from '@/lib/supabase'
+import { getWallets, getTransactions, Wallet, Transaction } from '@/lib/supabase'
 import { 
   IoNotificationsOutline, 
   IoSendOutline, 
@@ -15,23 +15,6 @@ import {
   IoCardOutline,
   IoPersonOutline
 } from 'react-icons/io5'
-
-interface Wallet {
-  id: string
-  name: string
-  balance: number
-  color: string
-}
-
-interface Transaction {
-  id: string
-  amount: number
-  description: string
-  date: string
-  type: 'income' | 'expense' | 'transfer'
-  merchant?: string
-  created_at: string
-}
 
 export default function FundeyMobileDashboard() {
   const { user, signOut } = useAuth()
@@ -190,11 +173,11 @@ export default function FundeyMobileDashboard() {
                 </div>
                 <div className="text-right">
                   <p className={`font-semibold ${
-                    transaction.type === 'income' ? 'text-green-600' : 'text-gray-900'
+                    (transaction.type || 'expense') === 'income' ? 'text-green-600' : 'text-gray-900'
                   }`}>
-                    {transaction.type === 'income' ? '+' : '-'}{formatAmount(transaction.amount)}
+                    {(transaction.type || 'expense') === 'income' ? '+' : '-'}{formatAmount(transaction.amount)}
                   </p>
-                  <p className="text-gray-500 text-xs capitalize">{transaction.type}</p>
+                  <p className="text-gray-500 text-xs capitalize">{transaction.type || 'transaction'}</p>
                 </div>
               </div>
             ))

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { getWallets, getTransactions, getSpendingSummary } from '@/lib/supabase'
+import { getWallets, getTransactions, getSpendingSummary, Wallet, Transaction } from '@/lib/supabase'
 import { 
   IoHomeOutline,
   IoStatsChartOutline,
@@ -14,24 +14,6 @@ import {
   IoTrendingUpOutline,
   IoTrendingDownOutline
 } from 'react-icons/io5'
-
-interface Wallet {
-  id: string
-  name: string
-  balance: number
-  color: string
-}
-
-interface Transaction {
-  id: string
-  amount: number
-  description: string
-  date: string
-  type: 'income' | 'expense' | 'transfer'
-  merchant?: string
-  status: string
-  created_at: string
-}
 
 export default function FundeyDesktopDashboard() {
   const { user, signOut } = useAuth()
@@ -335,17 +317,17 @@ export default function FundeyDesktopDashboard() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-sm capitalize">
-                            {transaction.type}
+                            {transaction.type || 'transaction'}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-gray-900 font-medium">
-                          {transaction.type === 'income' ? '+' : '-'}{formatAmount(transaction.amount)}
+                          {(transaction.type || 'expense') === 'income' ? '+' : '-'}{formatAmount(transaction.amount)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`px-2 py-1 rounded-full text-xs ${
-                            transaction.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                            (transaction.status || 'pending') === 'completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
                           }`}>
-                            {transaction.status}
+                            {transaction.status || 'pending'}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
