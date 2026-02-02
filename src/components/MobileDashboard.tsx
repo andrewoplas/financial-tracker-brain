@@ -6,7 +6,7 @@ import SpendingChart from './SpendingChart'
 import { 
   IoSettingsOutline, 
   IoNotificationsOutline, 
-  IoCreditCardOutline, 
+  IoCardOutline, 
   IoDownloadOutline,
   IoHomeOutline,
   IoTrendingUpOutline,
@@ -135,7 +135,7 @@ export default function MobileDashboard() {
         {/* Action Buttons */}
         <div className="flex space-x-3 mb-6">
           <button className="flex-1 bg-gray-900 text-white py-3 px-6 rounded-xl font-medium flex items-center justify-center space-x-2 hover:bg-gray-800 transition-colors">
-            <IoCreditCardOutline size={20} />
+            <IoCardOutline size={20} />
             <span>Pay</span>
           </button>
           <button className="flex-1 bg-gray-100 text-gray-900 py-3 px-6 rounded-xl font-medium flex items-center justify-center space-x-2 hover:bg-gray-200 transition-colors">

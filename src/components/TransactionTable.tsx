@@ -1,7 +1,7 @@
 'use client'
 
 import { 
-  IoCreditCardOutline, 
+  IoCardOutline, 
   IoPhonePortraitOutline, 
   IoBuildOutline,
   IoFastFoodOutline,
@@ -69,7 +69,7 @@ export default function TransactionTable() {
 
   const getPaymentIcon = (type: string) => {
     switch (type) {
-      case 'Credit Card': return IoCreditCardOutline
+      case 'Credit Card': return IoCardOutline
       case 'Bank Transfer': return IoBuildOutline
       case 'E-wallet': return IoPhonePortraitOutline
       default: return IoCashOutline
