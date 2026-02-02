@@ -6,6 +6,7 @@ import TransactionTable from './TransactionTable'
 import Sidebar from './Sidebar'
 import BudgetOverview from './BudgetOverview'
 import SpendingAnalysis from './SpendingAnalysis'
+import UserMenu from './UserMenu'
 
 export default function Dashboard() {
   const [totalBalance] = useState(74503)
@@ -35,12 +36,7 @@ export default function Dashboard() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5H9l5-5z" />
               </svg>
             </button>
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-medium">A</span>
-              </div>
-              <span className="text-gray-700 font-medium">Andrew</span>
-            </div>
+            <UserMenu />
           </div>
         </div>
 

@@ -13,6 +13,7 @@ export interface Wallet {
   balance: number
   budget_limit?: number
   color?: string
+  user_id: string
   created_at: string
   updated_at?: string
 }
@@ -32,6 +33,7 @@ export interface Transaction {
   date: string
   wallet_id: string
   category_id?: string
+  user_id: string
   type?: 'income' | 'expense' | 'transfer'
   status?: 'pending' | 'completed' | 'failed'
   payment_method?: string
@@ -44,7 +46,16 @@ export interface Transaction {
   categories?: Category
 }
 
-// API Functions
+// Helper function to get current user
+async function getCurrentUser() {
+  const { data: { user }, error } = await supabase.auth.getUser()
+  if (error || !user) {
+    throw new Error('User not authenticated')
+  }
+  return user
+}
+
+// API Functions (all require authentication via RLS)
 export async function getWallets(): Promise<Wallet[]> {
   const { data, error } = await supabase
     .from('wallets')
@@ -81,10 +92,17 @@ export async function getTransactions(limit: number = 50): Promise<Transaction[]
   return data || []
 }
 
-export async function addTransaction(transaction: Omit<Transaction, 'id' | 'created_at' | 'updated_at'>): Promise<Transaction> {
+export async function addTransaction(
+  transaction: Omit<Transaction, 'id' | 'user_id' | 'created_at' | 'updated_at'>
+): Promise<Transaction> {
+  const user = await getCurrentUser()
+  
   const { data, error } = await supabase
     .from('transactions')
-    .insert(transaction)
+    .insert({
+      ...transaction,
+      user_id: user.id
+    })
     .select(`
       *,
       wallets(name, color),
@@ -100,6 +118,48 @@ export async function updateWalletBalance(walletId: string, newBalance: number):
   const { error } = await supabase
     .from('wallets')
     .update({ balance: newBalance })
+    .eq('id', walletId)
+
+  if (error) throw error
+}
+
+export async function createWallet(
+  wallet: Omit<Wallet, 'id' | 'user_id' | 'created_at' | 'updated_at'>
+): Promise<Wallet> {
+  const user = await getCurrentUser()
+  
+  const { data, error } = await supabase
+    .from('wallets')
+    .insert({
+      ...wallet,
+      user_id: user.id
+    })
+    .select('*')
+    .single()
+
+  if (error) throw error
+  return data
+}
+
+export async function updateWallet(
+  walletId: string, 
+  updates: Partial<Omit<Wallet, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
+): Promise<Wallet> {
+  const { data, error } = await supabase
+    .from('wallets')
+    .update(updates)
+    .eq('id', walletId)
+    .select('*')
+    .single()
+
+  if (error) throw error
+  return data
+}
+
+export async function deleteWallet(walletId: string): Promise<void> {
+  const { error } = await supabase
+    .from('wallets')
+    .delete()
     .eq('id', walletId)
 
   if (error) throw error
@@ -121,4 +181,38 @@ export async function getWalletSpending(walletId: string, month?: string): Promi
   if (error) throw error
 
   return data?.reduce((sum, transaction) => sum + Math.abs(transaction.amount), 0) || 0
+}
+
+// Get spending summary by category
+export async function getSpendingSummary(period: 'week' | 'month' | 'year' = 'month') {
+  const now = new Date()
+  let startDate: string
+  
+  switch (period) {
+    case 'week':
+      const startOfWeek = new Date(now)
+      startOfWeek.setDate(now.getDate() - now.getDay())
+      startDate = startOfWeek.toISOString().slice(0, 10)
+      break
+    case 'year':
+      startDate = `${now.getFullYear()}-01-01`
+      break
+    default: // month
+      startDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
+  }
+
+  const { data, error } = await supabase
+    .from('transactions')
+    .select(`
+      amount,
+      type,
+      categories(name, icon, color),
+      wallets(name, color)
+    `)
+    .gte('date', startDate)
+    .eq('type', 'expense')
+
+  if (error) throw error
+
+  return data || []
 }
