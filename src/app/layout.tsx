@@ -7,6 +7,13 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: 'Financial Tracker Brain',
   description: 'Your intelligent financial tracking companion',
+  viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no',
+  themeColor: '#10B981',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Financial Brain',
+  },
 }
 
 export default function RootLayout({
