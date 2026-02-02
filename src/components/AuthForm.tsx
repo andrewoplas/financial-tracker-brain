@@ -65,42 +65,21 @@ export default function AuthForm({ onAuthSuccess }: AuthFormProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-emerald-100 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
+    <div className="min-h-screen bg-gradient-to-br from-green-400 to-green-500 flex items-center justify-center p-4">
+      <div className="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <span className="text-2xl">🧠</span>
+          <div className="w-16 h-16 bg-gray-900 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <div className="w-8 h-8 bg-green-500 rounded-lg"></div>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Financial Brain</h1>
-          <p className="text-gray-600 text-sm">Your intelligent financial companion</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Track Your Spending</h1>
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">Effortlessly</h2>
+          <p className="text-gray-600 text-sm leading-relaxed">
+            Manage your finances easily using our intuitive and user-friendly interface and set financial goals and monitor your progress
+          </p>
         </div>
 
-        {/* Auth Toggle */}
-        <div className="flex bg-gray-100 rounded-lg p-1 mb-6">
-          <button
-            type="button"
-            onClick={() => setIsLogin(true)}
-            className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
-              isLogin 
-                ? 'bg-white text-gray-900 shadow-sm' 
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            Sign In
-          </button>
-          <button
-            type="button"
-            onClick={() => setIsLogin(false)}
-            className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
-              !isLogin 
-                ? 'bg-white text-gray-900 shadow-sm' 
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            Sign Up
-          </button>
-        </div>
+        {/* Auth Toggle - Hidden for cleaner design, toggled via footer */}
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -118,7 +97,7 @@ export default function AuthForm({ onAuthSuccess }: AuthFormProps) {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                className="w-full pl-10 pr-4 py-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors bg-gray-50 focus:bg-white"
                 placeholder="Enter your email"
                 required
               />
@@ -139,7 +118,7 @@ export default function AuthForm({ onAuthSuccess }: AuthFormProps) {
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                className="w-full pl-10 pr-12 py-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors bg-gray-50 focus:bg-white"
                 placeholder="Enter your password"
                 required
               />
@@ -172,7 +151,7 @@ export default function AuthForm({ onAuthSuccess }: AuthFormProps) {
                   type={showPassword ? 'text' : 'password'}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                  className="w-full pl-10 pr-4 py-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors bg-gray-50 focus:bg-white"
                   placeholder="Confirm your password"
                   required
                 />
@@ -191,12 +170,12 @@ export default function AuthForm({ onAuthSuccess }: AuthFormProps) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-300 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
+            className="w-full bg-gray-900 hover:bg-gray-800 disabled:bg-gray-400 text-white font-semibold py-4 px-4 rounded-2xl transition-colors flex items-center justify-center space-x-2 text-lg"
           >
             {loading ? (
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
             ) : (
-              <span>{isLogin ? 'Sign In' : 'Create Account'}</span>
+              <span>{isLogin ? 'Sign In' : 'Get Started'}</span>
             )}
           </button>
         </form>
@@ -208,7 +187,7 @@ export default function AuthForm({ onAuthSuccess }: AuthFormProps) {
               Don't have an account?{' '}
               <button 
                 onClick={() => setIsLogin(false)}
-                className="text-emerald-600 hover:text-emerald-700 font-medium"
+                className="text-gray-900 hover:text-gray-700 font-semibold underline"
               >
                 Sign up
               </button>
@@ -218,9 +197,9 @@ export default function AuthForm({ onAuthSuccess }: AuthFormProps) {
               Already have an account?{' '}
               <button 
                 onClick={() => setIsLogin(true)}
-                className="text-emerald-600 hover:text-emerald-700 font-medium"
+                className="text-gray-900 hover:text-gray-700 font-semibold underline"
               >
-                Sign in
+                Login
               </button>
             </p>
           )}

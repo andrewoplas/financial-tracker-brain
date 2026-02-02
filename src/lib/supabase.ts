@@ -201,18 +201,23 @@ export async function getSpendingSummary(period: 'week' | 'month' | 'year' = 'mo
       startDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
   }
 
-  const { data, error } = await supabase
-    .from('transactions')
-    .select(`
-      amount,
-      type,
-      categories(name, icon, color),
-      wallets(name, color)
-    `)
-    .gte('date', startDate)
-    .eq('type', 'expense')
+  try {
+    const { data, error } = await supabase
+      .from('transactions')
+      .select(`
+        amount,
+        type,
+        categories(name, icon, color),
+        wallets(name, color)
+      `)
+      .gte('date', startDate)
+      .eq('type', 'expense')
 
-  if (error) throw error
+    if (error) throw error
 
-  return data || []
+    return data || []
+  } catch (error) {
+    console.error('Error getting spending summary:', error)
+    return []
+  }
 }
