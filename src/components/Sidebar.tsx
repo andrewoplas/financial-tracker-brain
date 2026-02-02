@@ -1,22 +1,33 @@
 'use client'
 
 import { useState } from 'react'
+import { 
+  IoStatsChartOutline,
+  IoWalletOutline,
+  IoDocumentTextOutline,
+  IoBarChartOutline,
+  IoTimeOutline,
+  IoNotificationsOutline,
+  IoSettingsOutline,
+  IoHelpCircleOutline,
+  IoSearchOutline
+} from 'react-icons/io5'
 
 export default function Sidebar() {
   const [activeItem, setActiveItem] = useState('dashboard')
 
   const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: '📊' },
-    { id: 'wallets', label: 'Wallets', icon: '💳', badge: '3' },
-    { id: 'transactions', label: 'Transactions', icon: '💸' },
-    { id: 'analytics', label: 'Analytics', icon: '📈', badge: '2' },
-    { id: 'history', label: 'History', icon: '📜', badge: '8' },
-    { id: 'notifications', label: 'Notifications', icon: '🔔', badge: '4' },
+    { id: 'dashboard', label: 'Dashboard', icon: IoStatsChartOutline },
+    { id: 'wallets', label: 'Wallets', icon: IoWalletOutline, badge: '3' },
+    { id: 'transactions', label: 'Transactions', icon: IoDocumentTextOutline },
+    { id: 'analytics', label: 'Analytics', icon: IoBarChartOutline, badge: '2' },
+    { id: 'history', label: 'History', icon: IoTimeOutline, badge: '8' },
+    { id: 'notifications', label: 'Notifications', icon: IoNotificationsOutline, badge: '4' },
   ]
 
   const tools = [
-    { id: 'settings', label: 'Settings', icon: '⚙️' },
-    { id: 'help', label: 'Help Center', icon: '❓' },
+    { id: 'settings', label: 'Settings', icon: IoSettingsOutline },
+    { id: 'help', label: 'Help Center', icon: IoHelpCircleOutline },
   ]
 
   return (
@@ -39,7 +50,7 @@ export default function Sidebar() {
             placeholder="Search..."
             className="w-full pl-8 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
           />
-          <span className="absolute left-2.5 top-2.5 text-gray-400 text-sm">🔍</span>
+          <IoSearchOutline size={16} className="absolute left-2.5 top-2.5 text-gray-400" />
         </div>
       </div>
 
@@ -59,7 +70,7 @@ export default function Sidebar() {
                 }`}
               >
                 <div className="flex items-center space-x-3">
-                  <span>{item.icon}</span>
+                  <item.icon size={18} />
                   <span className="font-medium">{item.label}</span>
                 </div>
                 {item.badge && (
@@ -90,7 +101,7 @@ export default function Sidebar() {
                     : 'text-gray-700 hover:bg-gray-50'
                 }`}
               >
-                <span>{item.icon}</span>
+                <item.icon size={18} />
                 <span className="font-medium">{item.label}</span>
               </button>
             ))}

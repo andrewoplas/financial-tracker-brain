@@ -1,5 +1,15 @@
 'use client'
 
+import { 
+  IoCreditCardOutline, 
+  IoPhonePortraitOutline, 
+  IoBuildOutline,
+  IoFastFoodOutline,
+  IoCarOutline,
+  IoFilmOutline,
+  IoCashOutline
+} from 'react-icons/io5'
+
 export default function TransactionTable() {
   const transactions = [
     {
@@ -10,7 +20,8 @@ export default function TransactionTable() {
       amount: -245,
       status: 'Completed',
       type: 'Credit Card',
-      wallet: 'Fun'
+      wallet: 'Fun',
+      icon: IoFastFoodOutline
     },
     {
       id: 2,
@@ -20,7 +31,8 @@ export default function TransactionTable() {
       amount: -150,
       status: 'Pending',
       type: 'E-wallet',
-      wallet: 'Life'
+      wallet: 'Life',
+      icon: IoCarOutline
     },
     {
       id: 3,
@@ -30,7 +42,8 @@ export default function TransactionTable() {
       amount: -549,
       status: 'Completed',
       type: 'Credit Card',
-      wallet: 'Fun'
+      wallet: 'Fun',
+      icon: IoFilmOutline
     },
     {
       id: 4,
@@ -40,7 +53,8 @@ export default function TransactionTable() {
       amount: 65000,
       status: 'Completed',
       type: 'Bank Transfer',
-      wallet: 'Life'
+      wallet: 'Life',
+      icon: IoCashOutline
     }
   ]
 
@@ -53,12 +67,12 @@ export default function TransactionTable() {
     }
   }
 
-  const getTransactionIcon = (type: string) => {
+  const getPaymentIcon = (type: string) => {
     switch (type) {
-      case 'Credit Card': return '💳'
-      case 'Bank Transfer': return '🏦'
-      case 'E-wallet': return '📱'
-      default: return '💰'
+      case 'Credit Card': return IoCreditCardOutline
+      case 'Bank Transfer': return IoBuildOutline
+      case 'E-wallet': return IoPhonePortraitOutline
+      default: return IoCashOutline
     }
   }
 
@@ -101,8 +115,8 @@ export default function TransactionTable() {
             <tr key={transaction.id} className="border-b border-gray-100 hover:bg-gray-50">
               <td className="py-4 pl-6">
                 <div className="flex items-center space-x-3">
-                  <div className="flex-shrink-0">
-                    <span className="text-2xl">{getTransactionIcon(transaction.type)}</span>
+                  <div className="flex-shrink-0 w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                    <transaction.icon size={20} className="text-gray-600" />
                   </div>
                   <div>
                     <div className="font-medium text-gray-900">{transaction.name}</div>
@@ -118,7 +132,13 @@ export default function TransactionTable() {
                   <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getWalletColor(transaction.wallet)}`}>
                     {transaction.wallet}
                   </span>
-                  <span className="text-sm text-gray-500">{transaction.type}</span>
+                  <div className="flex items-center space-x-1">
+                    {(() => {
+                      const PaymentIcon = getPaymentIcon(transaction.type)
+                      return <PaymentIcon size={14} className="text-gray-400" />
+                    })()}
+                    <span className="text-sm text-gray-500">{transaction.type}</span>
+                  </div>
                 </div>
               </td>
               <td className="py-4">

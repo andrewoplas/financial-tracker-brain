@@ -1,8 +1,17 @@
+import { IoHomeOutline, IoTrendingUpOutline, IoGameControllerOutline } from 'react-icons/io5'
+
 interface WalletCardProps {
   name: string
   balance: number
   color: string
   percentage: number
+}
+
+const getWalletIcon = (walletName: string) => {
+  if (walletName.includes('Life')) return IoHomeOutline
+  if (walletName.includes('Growth')) return IoTrendingUpOutline
+  if (walletName.includes('Fun')) return IoGameControllerOutline
+  return IoHomeOutline
 }
 
 export default function WalletCard({ name, balance, color, percentage }: WalletCardProps) {
@@ -11,11 +20,10 @@ export default function WalletCard({ name, balance, color, percentage }: WalletC
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-gray-900 font-semibold">{name}</h3>
         <div className={`w-12 h-12 ${color} rounded-xl flex items-center justify-center`}>
-          <span className="text-white text-xl">
-            {name.includes('Life') && '🏠'}
-            {name.includes('Growth') && '📈'}
-            {name.includes('Fun') && '🎯'}
-          </span>
+          {(() => {
+            const IconComponent = getWalletIcon(name)
+            return <IconComponent size={24} className="text-white" />
+          })()}
         </div>
       </div>
 
