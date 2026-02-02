@@ -54,3 +54,5 @@ The app exposes these functions for LLM interaction:
 ---
 
 Built for Andrew's financial tracking needs 🦖
+
+Environment updated: Feb 2, 2026
