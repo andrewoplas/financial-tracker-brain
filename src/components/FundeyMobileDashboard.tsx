@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { getWallets, getTransactions, Wallet, Transaction } from '@/lib/supabase'
+import AddTransactionForm from './AddTransactionForm'
 import { 
   IoNotificationsOutline, 
   IoSendOutline, 
@@ -22,27 +23,32 @@ export default function FundeyMobileDashboard() {
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [balanceVisible, setBalanceVisible] = useState(true)
   const [loading, setLoading] = useState(true)
+  const [showAddTransaction, setShowAddTransaction] = useState(false)
 
   const totalBalance = wallets.reduce((sum, wallet) => sum + wallet.balance, 0)
 
-  useEffect(() => {
-    async function loadData() {
-      try {
-        const [walletsData, transactionsData] = await Promise.all([
-          getWallets(),
-          getTransactions(5) // Get recent 5 transactions
-        ])
-        setWallets(walletsData)
-        setTransactions(transactionsData)
-      } catch (error) {
-        console.error('Error loading data:', error)
-      } finally {
-        setLoading(false)
-      }
+  const loadData = async () => {
+    try {
+      const [walletsData, transactionsData] = await Promise.all([
+        getWallets(),
+        getTransactions(5) // Get recent 5 transactions
+      ])
+      setWallets(walletsData)
+      setTransactions(transactionsData)
+    } catch (error) {
+      console.error('Error loading data:', error)
+    } finally {
+      setLoading(false)
     }
+  }
 
+  useEffect(() => {
     loadData()
   }, [])
+
+  const handleTransactionAdded = () => {
+    loadData() // Reload data when a transaction is added
+  }
 
   const formatAmount = (amount: number) => {
     return new Intl.NumberFormat('en-PH', {
@@ -127,9 +133,12 @@ export default function FundeyMobileDashboard() {
 
         {/* Action Buttons */}
         <div className="flex items-center space-x-4 mb-6">
-          <button className="bg-green-600 hover:bg-green-700 text-white rounded-2xl px-6 py-3 flex items-center space-x-2 transition-colors">
-            <IoSendOutline size={16} />
-            <span className="font-medium">Send</span>
+          <button 
+            onClick={() => setShowAddTransaction(true)}
+            className="bg-green-600 hover:bg-green-700 text-white rounded-2xl px-6 py-3 flex items-center space-x-2 transition-colors"
+          >
+            <span className="text-xl">+</span>
+            <span className="font-medium">Add Transaction</span>
           </button>
           <button className="bg-green-100 hover:bg-green-200 text-green-700 rounded-2xl px-6 py-3 flex items-center space-x-2 transition-colors">
             <IoArrowDownOutline size={16} />
@@ -203,6 +212,13 @@ export default function FundeyMobileDashboard() {
         </div>
         <div className="w-32 h-1 bg-gray-300 rounded-full mx-auto mt-2"></div>
       </div>
+
+      {/* Add Transaction Modal */}
+      <AddTransactionForm
+        isOpen={showAddTransaction}
+        onClose={() => setShowAddTransaction(false)}
+        onSuccess={handleTransactionAdded}
+      />
     </div>
   )
 }

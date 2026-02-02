@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { getWallets, getTransactions, getSpendingSummary, Wallet, Transaction } from '@/lib/supabase'
+import AddTransactionForm from './AddTransactionForm'
+import MoneyFlowChart from './MoneyFlowChart'
 import { 
   IoHomeOutline,
   IoStatsChartOutline,
@@ -20,29 +22,34 @@ export default function FundeyDesktopDashboard() {
   const [wallets, setWallets] = useState<Wallet[]>([])
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
+  const [showAddTransaction, setShowAddTransaction] = useState(false)
 
   const totalBalance = wallets.reduce((sum, wallet) => sum + wallet.balance, 0)
   const monthlyIncome = 101333 // Mock data for now
   const totalExpense = 26830 // Mock data for now
 
-  useEffect(() => {
-    async function loadData() {
-      try {
-        const [walletsData, transactionsData] = await Promise.all([
-          getWallets(),
-          getTransactions(10)
-        ])
-        setWallets(walletsData)
-        setTransactions(transactionsData)
-      } catch (error) {
-        console.error('Error loading data:', error)
-      } finally {
-        setLoading(false)
-      }
+  const loadData = async () => {
+    try {
+      const [walletsData, transactionsData] = await Promise.all([
+        getWallets(),
+        getTransactions(10)
+      ])
+      setWallets(walletsData)
+      setTransactions(transactionsData)
+    } catch (error) {
+      console.error('Error loading data:', error)
+    } finally {
+      setLoading(false)
     }
+  }
 
+  useEffect(() => {
     loadData()
   }, [])
+
+  const handleTransactionAdded = () => {
+    loadData() // Reload data when a transaction is added
+  }
 
   const formatAmount = (amount: number) => {
     return new Intl.NumberFormat('en-PH', {
@@ -147,6 +154,13 @@ export default function FundeyDesktopDashboard() {
               <p className="text-gray-600">Keep Track, Assess, and Enhance Your Financial Performance</p>
             </div>
             <div className="flex items-center space-x-4">
+              <button
+                onClick={() => setShowAddTransaction(true)}
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
+              >
+                <span>+</span>
+                <span>Add Transaction</span>
+              </button>
               <div className="relative">
                 <IoSearchOutline size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                 <input
@@ -222,9 +236,7 @@ export default function FundeyDesktopDashboard() {
                   <option>Monthly</option>
                 </select>
               </div>
-              <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
-                <p className="text-gray-500">Chart visualization placeholder</p>
-              </div>
+              <MoneyFlowChart period="month" />
             </div>
 
             {/* Budget Categories */}
@@ -342,6 +354,13 @@ export default function FundeyDesktopDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Add Transaction Modal */}
+      <AddTransactionForm
+        isOpen={showAddTransaction}
+        onClose={() => setShowAddTransaction(false)}
+        onSuccess={handleTransactionAdded}
+      />
     </div>
   )
 }
