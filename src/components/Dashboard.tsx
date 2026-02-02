@@ -4,6 +4,8 @@ import { useState } from 'react'
 import WalletCard from './WalletCard'
 import TransactionTable from './TransactionTable'
 import Sidebar from './Sidebar'
+import BudgetOverview from './BudgetOverview'
+import SpendingAnalysis from './SpendingAnalysis'
 
 export default function Dashboard() {
   const [totalBalance] = useState(74503)
@@ -89,17 +91,32 @@ export default function Dashboard() {
           ))}
         </div>
 
-        {/* Transaction History */}
-        <div className="bg-white rounded-lg shadow-sm">
-          <div className="p-6 border-b border-gray-200">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-900">Transaction History</h2>
-              <button className="text-emerald-600 hover:text-emerald-700 text-sm font-medium">
-                All Transactions →
-              </button>
+        {/* Budget Overview */}
+        <div className="mb-8">
+          <BudgetOverview />
+        </div>
+
+        {/* Two Column Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+          {/* Spending Analysis */}
+          <div className="lg:col-span-1">
+            <SpendingAnalysis />
+          </div>
+
+          {/* Transaction History */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-lg shadow-sm">
+              <div className="p-6 border-b border-gray-200">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold text-gray-900">Transaction History</h2>
+                  <button className="text-emerald-600 hover:text-emerald-700 text-sm font-medium">
+                    All Transactions →
+                  </button>
+                </div>
+              </div>
+              <TransactionTable />
             </div>
           </div>
-          <TransactionTable />
         </div>
       </div>
     </div>

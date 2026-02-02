@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import BottomNavigation from './BottomNavigation'
 import SpendingChart from './SpendingChart'
+import BudgetCard from './BudgetCard'
 import { 
   IoSettingsOutline, 
   IoNotificationsOutline, 
@@ -35,6 +36,73 @@ export default function MobileDashboard() {
     { id: 3, name: 'Angkas Premium', category: 'Transportation', amount: -150, icon: IoCarOutline, wallet: 'Life' },
     { id: 4, name: 'Coffee Bean', category: 'Food & Drinks', amount: -180, icon: IoCafeOutline, wallet: 'Fun' }
   ]
+
+  const mobileBudgetData = [
+    { category: 'Food & Dining', spent: 450, budget: 500, icon: IoFastFoodOutline, color: '#F59E0B' },
+    { category: 'Transportation', spent: 280, budget: 400, icon: IoCarOutline, color: '#3B82F6' },
+    { category: 'Entertainment', spent: 180, budget: 200, icon: IoFilmOutline, color: '#8B5CF6' }
+  ]
+
+  if (activeTab === 'wallet') {
+    return (
+      <div className="min-h-screen bg-gray-50 pb-20">
+        {/* Mobile Header */}
+        <div className="bg-white px-6 pt-12 pb-6">
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-2xl font-bold text-gray-900">Budget Overview</h1>
+            <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+              <IoSettingsOutline size={20} />
+            </button>
+          </div>
+        </div>
+
+        {/* Overall Budget */}
+        <div className="px-6 mb-6">
+          <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-xl p-6 text-white">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-lg font-bold">Monthly Budget</h2>
+                <p className="text-emerald-100 text-sm">February 2026</p>
+              </div>
+              <div className="text-right">
+                <div className="text-2xl font-bold">₱1,100</div>
+                <div className="text-emerald-100 text-xs">Total Budget</div>
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <div className="text-xl font-bold">₱910</div>
+                <div className="text-emerald-100 text-sm">Spent (83%)</div>
+              </div>
+              <div className="text-right">
+                <div className="text-lg font-bold">₱190</div>
+                <div className="text-emerald-100 text-sm">Remaining</div>
+              </div>
+            </div>
+
+            <div className="w-full bg-emerald-400 rounded-full h-2">
+              <div className="bg-white h-2 rounded-full" style={{ width: '83%' }}></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Budget Categories */}
+        <div className="px-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Categories</h3>
+          <div className="space-y-4">
+            {mobileBudgetData.map((budget, index) => (
+              <div key={index} className="bg-white rounded-xl p-4">
+                <BudgetCard {...budget} />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <BottomNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+      </div>
+    )
+  }
 
   if (activeTab === 'insights') {
     return (
