@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { getWallets, getCategories, addTransaction, updateWalletBalance, Wallet, Category } from '@/lib/supabase'
+import { getWallets, getCategories, addTransaction, recalculateWalletBalance, Wallet, Category } from '@/lib/supabase'
 import { IoClose, IoWalletOutline, IoCalendarOutline, IoCardOutline } from 'react-icons/io5'
 
 interface AddTransactionFormProps {
@@ -72,9 +72,8 @@ export default function AddTransactionForm({ isOpen, onClose, onSuccess }: AddTr
         status: 'completed'
       })
 
-      // Update wallet balance
-      const balanceChange = formData.type === 'income' ? amount : -amount
-      await updateWalletBalance(formData.wallet_id, balanceChange)
+      // Recalculate wallet balance from all transactions
+      await recalculateWalletBalance(formData.wallet_id)
 
       // Reset form
       setFormData({
@@ -125,21 +124,25 @@ export default function AddTransactionForm({ isOpen, onClose, onSuccess }: AddTr
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-md shadow-xl">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-xl font-bold text-gray-900">Add Transaction</h2>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end lg:items-center justify-center z-50 p-0 lg:p-4">
+      <div className="bg-white rounded-t-3xl lg:rounded-2xl w-full max-w-md shadow-xl slide-up transform transition-all duration-300 ease-out max-h-[90vh] overflow-hidden">
+        {/* Header with mobile enhancements */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 sticky top-0 bg-white z-10">
+          <div>
+            <h2 className="text-xl font-bold text-gray-900">Add Transaction</h2>
+            <p className="text-gray-500 text-sm">Track your spending and income</p>
+          </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            className="mobile-button p-3 hover:bg-gray-100 rounded-full transition-colors no-tap-highlight"
           >
             <IoClose size={24} className="text-gray-600" />
           </button>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        {/* Form with mobile optimizations */}
+        <div className="overflow-y-auto scroll-touch max-h-[calc(90vh-140px)] lg:max-h-none">
+          <form onSubmit={handleSubmit} className="p-6 space-y-6 pb-24 lg:pb-6">
           {/* Transaction Type */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-3">
@@ -151,13 +154,13 @@ export default function AddTransactionForm({ isOpen, onClose, onSuccess }: AddTr
                   key={type}
                   type="button"
                   onClick={() => setFormData(prev => ({ ...prev, type }))}
-                  className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                  className={`mobile-button flex-1 py-3 px-4 rounded-2xl text-sm font-medium transition-all duration-200 no-tap-highlight ${
                     formData.type === type
-                      ? getTypeColor(type)
-                      : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                      ? `${getTypeColor(type)} shadow-lg scale-105`
+                      : 'bg-gray-100 hover:bg-gray-200 text-gray-700 hover:shadow-md'
                   }`}
                 >
-                  {type.charAt(0).toUpperCase() + type.slice(1)}
+                  <span className="block">{type.charAt(0).toUpperCase() + type.slice(1)}</span>
                 </button>
               ))}
             </div>
@@ -165,11 +168,11 @@ export default function AddTransactionForm({ isOpen, onClose, onSuccess }: AddTr
 
           {/* Amount */}
           <div>
-            <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-2">
-              Amount
+            <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-3">
+              Amount <span className="text-red-500">*</span>
             </label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-lg">
+              <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 text-lg font-medium">
                 ₱
               </span>
               <input
@@ -181,16 +184,18 @@ export default function AddTransactionForm({ isOpen, onClose, onSuccess }: AddTr
                   ...prev, 
                   amount: formatAmount(e.target.value) 
                 }))}
-                className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-lg"
+                className="mobile-input w-full pl-10 pr-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-green-500 text-lg font-medium no-tap-highlight"
                 placeholder="0.00"
+                inputMode="decimal"
               />
             </div>
+            <p className="text-gray-500 text-xs mt-2">Enter the transaction amount</p>
           </div>
 
           {/* Description */}
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-              Description
+            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-3">
+              Description <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -198,26 +203,28 @@ export default function AddTransactionForm({ isOpen, onClose, onSuccess }: AddTr
               required
               value={formData.description}
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+              className="mobile-input w-full px-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-green-500 no-tap-highlight"
               placeholder="What was this transaction for?"
+              autoComplete="off"
             />
+            <p className="text-gray-500 text-xs mt-2">Brief description of the transaction</p>
           </div>
 
           {/* Wallet Selection */}
           <div>
-            <label htmlFor="wallet" className="block text-sm font-medium text-gray-700 mb-2">
-              Wallet
+            <label htmlFor="wallet" className="block text-sm font-medium text-gray-700 mb-3">
+              Wallet <span className="text-red-500">*</span>
             </label>
             <div className="relative">
-              <IoWalletOutline size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <IoWalletOutline size={20} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <select
                 id="wallet"
                 required
                 value={formData.wallet_id}
                 onChange={(e) => setFormData(prev => ({ ...prev, wallet_id: e.target.value }))}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 appearance-none bg-white"
+                className="mobile-input w-full pl-12 pr-10 py-4 border-2 border-gray-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-green-500 appearance-none bg-white no-tap-highlight"
               >
-                <option value="">Select wallet...</option>
+                <option value="">Choose wallet...</option>
                 {wallets.map(wallet => (
                   <option key={wallet.id} value={wallet.id}>
                     {wallet.name} - ₱{wallet.balance.toLocaleString()}
@@ -229,16 +236,16 @@ export default function AddTransactionForm({ isOpen, onClose, onSuccess }: AddTr
 
           {/* Category */}
           <div>
-            <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
-              Category <span className="text-gray-400">(Optional)</span>
+            <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-3">
+              Category <span className="text-gray-400 text-sm">(Optional)</span>
             </label>
             <div className="relative">
-              <IoCardOutline size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <IoCardOutline size={20} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <select
                 id="category"
                 value={formData.category_id}
                 onChange={(e) => setFormData(prev => ({ ...prev, category_id: e.target.value }))}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 appearance-none bg-white"
+                className="mobile-input w-full pl-12 pr-10 py-4 border-2 border-gray-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-green-500 appearance-none bg-white no-tap-highlight"
               >
                 <option value="">No category</option>
                 {categories.map(category => (
@@ -252,40 +259,49 @@ export default function AddTransactionForm({ isOpen, onClose, onSuccess }: AddTr
 
           {/* Date */}
           <div>
-            <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-2">
-              Date
+            <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-3">
+              Date <span className="text-red-500">*</span>
             </label>
             <div className="relative">
-              <IoCalendarOutline size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <IoCalendarOutline size={20} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
                 type="date"
                 id="date"
                 required
                 value={formData.date}
                 onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                className="mobile-input w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-green-500 no-tap-highlight"
               />
             </div>
           </div>
 
-          {/* Submit Button */}
-          <div className="flex space-x-3 pt-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 py-3 px-4 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex-1 py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? 'Adding...' : 'Add Transaction'}
-            </button>
+          {/* Submit Buttons - Enhanced for mobile */}
+          <div className="sticky bottom-0 bg-white pt-6 pb-2 -mx-6 px-6 border-t border-gray-100 lg:static lg:border-0">
+            <div className="flex space-x-3">
+              <button
+                type="button"
+                onClick={onClose}
+                className="mobile-button flex-1 py-4 px-6 border-2 border-gray-300 rounded-2xl text-gray-700 font-medium hover:bg-gray-50 transition-all no-tap-highlight"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="mobile-button flex-1 py-4 px-6 bg-green-600 hover:bg-green-700 text-white font-medium rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl no-tap-highlight"
+              >
+                {loading ? (
+                  <div className="flex items-center justify-center space-x-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Adding...</span>
+                  </div>
+                ) : (
+                  'Add Transaction'
+                )}
+              </button>
+            </div>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   )

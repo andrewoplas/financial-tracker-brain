@@ -45,7 +45,7 @@ export default function BottomNavigation({ activeTab, onTabChange }: BottomNavig
   ]
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-6 py-2 safe-area-bottom">
+    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 safe-area-bottom backdrop-blur-sm bg-white/95">
       <div className="flex items-center justify-around">
         {tabs.map((tab) => {
           const IconComponent = activeTab === tab.id ? tab.activeIcon : tab.icon
@@ -53,13 +53,17 @@ export default function BottomNavigation({ activeTab, onTabChange }: BottomNavig
             <button
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
-              className={`flex flex-col items-center py-2 px-3 min-w-0 transition-colors ${
+              className={`mobile-button flex flex-col items-center py-3 px-4 min-w-0 transition-all duration-200 rounded-2xl hover:bg-gray-50 no-tap-highlight ${
                 activeTab === tab.id 
-                  ? 'text-emerald-600' 
-                  : 'text-gray-500'
+                  ? 'text-emerald-600 scale-105' 
+                  : 'text-gray-500 hover:text-gray-700'
               }`}
             >
-              <IconComponent size={20} className="mb-1" />
+              <div className={`mb-1 transition-transform duration-200 ${
+                activeTab === tab.id ? 'scale-110' : ''
+              }`}>
+                <IconComponent size={20} />
+              </div>
               <span className="text-xs font-medium">{tab.label}</span>
             </button>
           )
@@ -67,8 +71,8 @@ export default function BottomNavigation({ activeTab, onTabChange }: BottomNavig
       </div>
       
       {/* Home Indicator */}
-      <div className="flex justify-center mt-1">
-        <div className="w-32 h-1 bg-gray-900 rounded-full"></div>
+      <div className="flex justify-center mt-2 pb-1">
+        <div className="w-32 h-1 bg-gray-900 rounded-full opacity-30"></div>
       </div>
     </div>
   )

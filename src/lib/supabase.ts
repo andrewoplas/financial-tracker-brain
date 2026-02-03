@@ -114,6 +114,7 @@ export async function addTransaction(
   return data
 }
 
+// DEPRECATED: Use adjustWalletBalance or recalculateWalletBalance instead
 export async function updateWalletBalance(walletId: string, newBalance: number): Promise<void> {
   const { error } = await supabase
     .from('wallets')
@@ -121,6 +122,132 @@ export async function updateWalletBalance(walletId: string, newBalance: number):
     .eq('id', walletId)
 
   if (error) throw error
+}
+
+// Calculate the actual wallet balance from all transactions
+export async function calculateWalletBalanceFromTransactions(walletId: string): Promise<number> {
+  const { data, error } = await supabase
+    .from('transactions')
+    .select('amount, type')
+    .eq('wallet_id', walletId)
+
+  if (error) throw error
+
+  let balance = 0
+  if (data) {
+    for (const transaction of data) {
+      if (transaction.type === 'income') {
+        balance += transaction.amount
+      } else if (transaction.type === 'expense') {
+        balance -= transaction.amount
+      }
+      // For transfers, we'll handle them separately in a more complex system
+    }
+  }
+
+  return balance
+}
+
+// Recalculate and update the wallet balance from all transactions
+export async function recalculateWalletBalance(walletId: string): Promise<number> {
+  const calculatedBalance = await calculateWalletBalanceFromTransactions(walletId)
+  
+  const { error } = await supabase
+    .from('wallets')
+    .update({ balance: calculatedBalance })
+    .eq('id', walletId)
+
+  if (error) throw error
+  
+  return calculatedBalance
+}
+
+// Adjust wallet balance by a specific amount (delta)
+export async function adjustWalletBalance(walletId: string, changeAmount: number): Promise<number> {
+  // First get current balance
+  const { data: wallet, error: fetchError } = await supabase
+    .from('wallets')
+    .select('balance')
+    .eq('id', walletId)
+    .single()
+
+  if (fetchError) throw fetchError
+  if (!wallet) throw new Error('Wallet not found')
+
+  const newBalance = wallet.balance + changeAmount
+
+  const { error: updateError } = await supabase
+    .from('wallets')
+    .update({ balance: newBalance })
+    .eq('id', walletId)
+
+  if (updateError) throw updateError
+
+  return newBalance
+}
+
+// Get wallet balance with option to recalculate from transactions
+export async function getWalletBalance(walletId: string, recalculate: boolean = false): Promise<number> {
+  if (recalculate) {
+    return await recalculateWalletBalance(walletId)
+  }
+
+  const { data, error } = await supabase
+    .from('wallets')
+    .select('balance')
+    .eq('id', walletId)
+    .single()
+
+  if (error) throw error
+  if (!data) throw new Error('Wallet not found')
+
+  return data.balance
+}
+
+// Validate that stored balance matches calculated balance
+export async function validateWalletBalance(walletId: string): Promise<{
+  storedBalance: number
+  calculatedBalance: number
+  isValid: boolean
+  difference: number
+}> {
+  const [storedBalance, calculatedBalance] = await Promise.all([
+    getWalletBalance(walletId, false),
+    calculateWalletBalanceFromTransactions(walletId)
+  ])
+
+  const difference = Math.abs(storedBalance - calculatedBalance)
+  const isValid = difference < 0.01 // Allow for small rounding differences
+
+  return {
+    storedBalance,
+    calculatedBalance,
+    isValid,
+    difference
+  }
+}
+
+// Fix all wallet balances by recalculating from transactions
+export async function fixAllWalletBalances(): Promise<{
+  fixed: number
+  errors: { walletId: string, error: string }[]
+}> {
+  const wallets = await getWallets()
+  const results = { fixed: 0, errors: [] as { walletId: string, error: string }[] }
+
+  for (const wallet of wallets) {
+    try {
+      await recalculateWalletBalance(wallet.id)
+      results.fixed++
+    } catch (error) {
+      results.errors.push({
+        walletId: wallet.id,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      })
+    }
+  }
+
+  return results
 }
 
 export async function createWallet(

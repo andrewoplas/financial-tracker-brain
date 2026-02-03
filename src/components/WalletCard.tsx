@@ -16,7 +16,7 @@ const getWalletIcon = (walletName: string) => {
 
 export default function WalletCard({ name, balance, color, percentage }: WalletCardProps) {
   return (
-    <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+    <div className="mobile-card bg-white rounded-2xl p-6 shadow-md border border-gray-200 hover:shadow-lg transition-all duration-200 active:scale-[0.98] no-tap-highlight">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-gray-900 font-semibold">{name}</h3>
         <div className={`w-12 h-12 ${color} rounded-xl flex items-center justify-center`}>
@@ -48,11 +48,11 @@ export default function WalletCard({ name, balance, color, percentage }: WalletC
       </div>
 
       {/* Action Buttons */}
-      <div className="flex space-x-2">
-        <button className="flex-1 bg-emerald-50 text-emerald-600 py-2 px-3 rounded-lg text-sm font-medium hover:bg-emerald-100 transition-colors">
+      <div className="flex space-x-3">
+        <button className="mobile-button flex-1 bg-emerald-50 text-emerald-600 py-3 px-4 rounded-xl text-sm font-medium hover:bg-emerald-100 transition-all shadow-sm hover:shadow-md no-tap-highlight">
           Add Money
         </button>
-        <button className="flex-1 bg-gray-50 text-gray-600 py-2 px-3 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors">
+        <button className="mobile-button flex-1 bg-gray-50 text-gray-600 py-3 px-4 rounded-xl text-sm font-medium hover:bg-gray-100 transition-all shadow-sm hover:shadow-md no-tap-highlight">
           Transfer
         </button>
       </div>
