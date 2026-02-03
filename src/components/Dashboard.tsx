@@ -1,6 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useAuth } from '@/contexts/AuthContext'
+import { getWallets, getTransactions, Wallet, Transaction } from '@/lib/supabase'
 import WalletCard from './WalletCard'
 import TransactionTable from './TransactionTable'
 import Sidebar from './Sidebar'
@@ -9,14 +11,65 @@ import SpendingAnalysis from './SpendingAnalysis'
 import UserMenu from './UserMenu'
 
 export default function Dashboard() {
-  const [totalBalance] = useState(74503)
-  const [monthlyIncome] = useState(101333)
+  const { user } = useAuth()
+  const [wallets, setWallets] = useState<Wallet[]>([])
+  const [transactions, setTransactions] = useState<Transaction[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const walletData = [
-    { name: 'Life Wallet', balance: 35000, color: 'bg-emerald-500', percentage: 65 },
-    { name: 'Growth Wallet', balance: 25000, color: 'bg-emerald-400', percentage: 78 },
-    { name: 'Fun Wallet', balance: 14503, color: 'bg-emerald-300', percentage: 42 },
-  ]
+  const totalBalance = wallets.reduce((sum, wallet) => sum + wallet.balance, 0)
+  const monthlyIncome = 101333 // TODO: Calculate from actual income transactions
+  
+  // Transform wallets for WalletCard component
+  const walletData = wallets.map(wallet => ({
+    name: wallet.name,
+    balance: wallet.balance,
+    color: wallet.color === '#EF4444' ? 'bg-red-500' : 
+           wallet.color === '#10B981' ? 'bg-emerald-500' : 
+           wallet.color === '#F59E0B' ? 'bg-yellow-500' : 'bg-gray-500',
+    percentage: wallet.budget_limit ? Math.round((Math.abs(wallet.balance) / wallet.budget_limit) * 100) : 0
+  }))
+
+  const loadData = async () => {
+    if (!user) return
+    
+    try {
+      const [walletsData, transactionsData] = await Promise.all([
+        getWallets(),
+        getTransactions(10)
+      ])
+      setWallets(walletsData)
+      setTransactions(transactionsData)
+    } catch (error) {
+      console.error('Error loading dashboard data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadData()
+  }, [user])
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen bg-gray-50 items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading dashboard...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return (
+      <div className="flex min-h-screen bg-gray-50 items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600 mb-4">Please sign in to view your dashboard</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="flex min-h-screen bg-gray-50">
